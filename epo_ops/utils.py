@@ -36,3 +36,40 @@ def validate_date(date):
         return date
     except ValueError:
         raise InvalidDate('{0} is not a valid YYYYMMDD date.'.format(date))
+
+def check_list(listvar):
+    if not isinstance(listvar, list):
+        listvar = [listvar]
+    return listvar
+    
+def safeget(dct, *keys):
+    """ Recursive function to safely access nested dicts or return None. 
+    param dict dct: dictionary to process
+    param string keys: one or more keys"""
+    for key in keys:
+        try:
+            dct = dct[key]
+        except KeyError:
+            return None
+    return dct
+
+def keysearch(d, key):
+    """Recursive function to look for first occurence of key in multi-level dict. 
+    param dict d: dictionary to process
+    param string key: key to locate"""
+ 
+    if isinstance(d, dict):
+        if key in d:
+            return d[key]
+        else:
+            if isinstance(d, dict):
+                for k in d:
+                    found = keysearch(d[k], key)
+                    if found:
+                        return found
+            else:
+                if isinstance(d, list):
+                    for i in d:
+                        found = keysearch(d[k], key)
+                        if found:
+                            return found

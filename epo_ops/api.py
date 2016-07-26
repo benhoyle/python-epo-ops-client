@@ -9,7 +9,9 @@ import requests
 
 from . import exceptions
 from .middlewares import Throttler
-from .models import AccessToken, Request
+from .models import AccessToken, Request, Epodoc
+
+from .utils import keysearch
 
 log = logging.getLogger(__name__)
 
@@ -145,6 +147,28 @@ class Client(object):
     def register_search(self, cql, range_begin=1, range_end=25):
         range = dict(key='Range', begin=range_begin, end=range_end)
         return self._search_request(self.__register_search_path__, cql, range)
+
+    def published_claims(self, number, number_type="publication"):
+        """ Wrapper to get published claims for a particular publication
+        or application number. Returns list of claims."""
+        response = self.published_data(  
+            reference_type = 'publication',  
+            input = Epodoc(number),  
+            endpoint = 'claims',  
+            constituents = []
+        )
+        return [entry['$'] for entry in keysearch(response.json(), "claim-text")]
+        
+    def published_description(self, number, number_type="publication"):
+        """ Wrapper to get published description for a particular publication
+        or application number. Returns list of paragraphs."""
+        response = self.published_data(  
+            reference_type = 'publication',  
+            input = Epodoc(number),  
+            endpoint = 'description',  
+            constituents = []
+        )
+        return [entry['$'] for entry in keysearch(response.json(), "p")]
 
 
 class RegisteredClient(Client):
